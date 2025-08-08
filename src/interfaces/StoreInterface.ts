@@ -50,6 +50,7 @@ export interface IStoreData {
   typeStore: BusinessTypeMarchent;
   primaryColor: string;
   businessType: BusinessType;
+  storeIsActive: boolean;
 
   secondaryColor: string;
   accentColor: string;

@@ -1,10 +1,12 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { NavLink, useParams, useLocation } from 'react-router-dom';
+import { NavLink, useParams, useLocation, useNavigate, Link } from 'react-router-dom';
 import { cn } from '../../utils/cn';
 import * as lucideReact from 'lucide-react';
-import { useDispatch } from 'react-redux';
-import { logout } from '../../Store/DashBoardSlice/AuthSlice'; 
+import { useDispatch, useSelector } from 'react-redux';
+import { logout } from '../../Store/DashBoardSlice/AuthSlice';
+import { RootState } from '../../Store/Store';
+import { BusinessTypeMarchent } from '../../interfaces/StoreInterface'; 
 
 interface SidebarProps {
   isRegistrationCompleted: boolean;
@@ -24,6 +26,12 @@ const UnifiedSidebar: React.FC<SidebarProps> = ({ isRegistrationCompleted }) => 
   const location = useLocation();
   const isRTL = i18n.language === 'ar';
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  // Get the current store from Redux state
+  const storeData = useSelector((state: RootState) => 
+    state.Dashboard.stores.currentStore
+  );
 
   // Check if we're in a store-specific route
   const isStoreRoute = location.pathname.startsWith('/store/');
@@ -79,12 +87,22 @@ const UnifiedSidebar: React.FC<SidebarProps> = ({ isRegistrationCompleted }) => 
       label: t('sidebar.content'),
       href: `/store/${storeId}/content-mapping`,
     },
-    {
-      icon: <lucideReact.Package size={20} />,
-      label: t('sidebar.products'),
-      href: `/store/${storeId}/products`,
-      disabled: !isRegistrationCompleted,
-    },
+    // عرض المنتجات أو الخدمات حسب نوع المتجر
+    ...(storeData?.typeStore === BusinessTypeMarchent.services ? [
+      {
+        icon: <lucideReact.Wrench size={20} />,
+        label: t('sidebar.services'),
+        href: `/store/${storeId}/services`,
+        disabled: !isRegistrationCompleted,
+      }
+    ] : [
+      {
+        icon: <lucideReact.Package size={20} />,
+        label: t('sidebar.products'),
+        href: `/store/${storeId}/products`,
+        disabled: !isRegistrationCompleted,
+      }
+    ]),
     {
       icon: <lucideReact.FolderTree size={20} />,
       label: t('sidebar.categories'),
@@ -119,6 +137,24 @@ const UnifiedSidebar: React.FC<SidebarProps> = ({ isRegistrationCompleted }) => 
       icon: <lucideReact.HandCoins size={20} />,
       label: t('sidebar.payments'),
       href: `/store/${storeId}/payments`,
+      disabled: !isRegistrationCompleted,
+    },
+    {
+      icon: <lucideReact.Clock size={20} />,
+      label: t('sidebar.store_hours'),
+      href: `/store/${storeId}/store-hours`,
+      disabled: !isRegistrationCompleted,
+    },
+    {
+      icon: <lucideReact.DollarSign size={20} />,
+      label: t('sidebar.price_offers'),
+      href: `/store/${storeId}/price-offers`,
+      disabled: !isRegistrationCompleted,
+    },
+    {
+      icon: <lucideReact.Globe size={20} />,
+      label: t('translation.title'),
+      href: `/store/${storeId}/translation`,
       disabled: !isRegistrationCompleted,
     },
   ];
@@ -171,13 +207,16 @@ const UnifiedSidebar: React.FC<SidebarProps> = ({ isRegistrationCompleted }) => 
 
       <div className="p-4 border-t border-gray-200">
         {isStoreRoute ? (
-          <button
-            onClick={() => window.location.href = '/your-stores'}
-            className="flex items-center w-full px-3 py-2 text-sm text-gray-700 rounded-md hover:bg-gray-100"
-          >
-            <lucideReact.ArrowLeft size={20} className="mr-3" />
-            <span>{t('sidebar.back_to_stores')}</span>
-          </button>
+       
+       <Link to="/stores">
+        <button
+          className="flex items-center w-full px-3 py-2 text-sm text-gray-700 rounded-md hover:bg-gray-100"
+        >
+          <lucideReact.ArrowLeft size={20} className="mr-3" />
+          <span>{t('sidebar.back_to_stores')}</span>
+        </button>
+       </Link>
+        
         ) : (
           <>
             <button
@@ -190,6 +229,7 @@ const UnifiedSidebar: React.FC<SidebarProps> = ({ isRegistrationCompleted }) => 
             <button className="flex items-center w-full px-3 py-2 mt-2 text-sm text-gray-700 rounded-md hover:bg-gray-100"
             onClick={() => {
               dispatch(logout());
+              navigate('/login');
             }}
             >
               <lucideReact.LogOut size={20} className="mr-3" />

@@ -24,7 +24,7 @@ const initialState: CreateStoreState = {
         ownerId: 0,
         logo: null,
         socialMediaLinks: [],
-        typeStore: BusinessTypeMarchent.products // إضافة typeStore بقيمة منتجات كقيمة افتراضية
+        typeStore: BusinessTypeMarchent.products
     },
     currentStep: 0,
     loading: false,
@@ -69,8 +69,12 @@ const CreateStoreSlice = createSlice({
         setFont: (state, action: PayloadAction<string>) => {
             state.storeData.font = action.payload;
         },
-        setLogo: (state, action: PayloadAction<File | null>) => {
-            state.storeData.logo = action.payload;
+        setLogo: (state, action: PayloadAction<File | string | null>) => {
+            if (action.payload instanceof File) {
+                state.storeData.logo = action.payload;
+            } else {
+                state.storeData.logo = action.payload;
+            }
         },
         setTypeStore: (state, action: PayloadAction<BusinessTypeMarchent>) => {
             state.storeData.typeStore = action.payload;
@@ -107,7 +111,6 @@ const CreateStoreSlice = createSlice({
         createStoreSuccess: (state, action: PayloadAction<StoreResponseData>) => {
             state.loading = false;
             state.success = true;
-            // تحويل StoreResponseData إلى ICreateStore
             state.storeData = {
                 id: action.payload.id,
                 dominName: action.payload.dominName,
@@ -120,7 +123,7 @@ const CreateStoreSlice = createSlice({
                 font: action.payload.font,
                 templateId: action.payload.templateId,
                 ownerId: action.payload.ownerId,
-                logo: state.storeData.logo, // Preserve the existing logo
+                logo: state.storeData.logo,
                 socialMediaLinks: action.payload.socialMediaLinks || [],
                 typeStore: action.payload.typeStore
             };

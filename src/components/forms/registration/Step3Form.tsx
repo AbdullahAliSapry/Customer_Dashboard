@@ -144,7 +144,9 @@ const Step3Form: React.FC<Step3FormProps> = ({ onComplete, onBack, formData, isS
                 className="p-2 outline-none"
                 error={touched.numberIdentity && errors.numberIdentity ? t(errors.numberIdentity) : undefined}
               />
-              <ErrorMessage name="numberIdentity" component="div" className="mt-1 text-sm text-red-600" />
+              <ErrorMessage name="numberIdentity" component="div" className="mt-1 text-sm text-red-600">
+                {(msg) => <div>{t(msg)}</div>}
+              </ErrorMessage>
             </div>
 
             <div>
@@ -158,7 +160,9 @@ const Step3Form: React.FC<Step3FormProps> = ({ onComplete, onBack, formData, isS
                 className="p-2 outline-none"
                 error={touched.licenseNumber && errors.licenseNumber ? t(errors.licenseNumber) : undefined}
               />
-              <ErrorMessage name="licenseNumber" component="div" className="mt-1 text-sm text-red-600" />
+              <ErrorMessage name="licenseNumber" component="div" className="mt-1 text-sm text-red-600">
+                {(msg) => <div>{t(msg)}</div>}
+              </ErrorMessage>
             </div>
 
             <div>
@@ -172,7 +176,9 @@ const Step3Form: React.FC<Step3FormProps> = ({ onComplete, onBack, formData, isS
                 className="p-2 outline-none"
                 error={touched.licensedActivity && errors.licensedActivity ? t(errors.licensedActivity) : undefined}
               />
-              <ErrorMessage name="licensedActivity" component="div" className="mt-1 text-sm text-red-600" />
+              <ErrorMessage name="licensedActivity" component="div" className="mt-1 text-sm text-red-600">
+                {(msg) => <div>{t(msg)}</div>}
+              </ErrorMessage>
             </div>
 
             <div>
@@ -190,7 +196,9 @@ const Step3Form: React.FC<Step3FormProps> = ({ onComplete, onBack, formData, isS
                   />
                 )}
               </Field>
-              <ErrorMessage name="issueDate" component="div" className="mt-1 text-sm text-red-600" />
+              <ErrorMessage name="issueDate" component="div" className="mt-1 text-sm text-red-600">
+                {(msg) => <div>{t(msg)}</div>}
+              </ErrorMessage>
             </div>
 
             <div>
@@ -208,7 +216,9 @@ const Step3Form: React.FC<Step3FormProps> = ({ onComplete, onBack, formData, isS
                   />
                 )}
               </Field>
-              <ErrorMessage name="expiryDate" component="div" className="mt-1 text-sm text-red-600" />
+              <ErrorMessage name="expiryDate" component="div" className="mt-1 text-sm text-red-600">
+                {(msg) => <div>{t(msg)}</div>}
+              </ErrorMessage>
             </div>
           </div>
 
@@ -226,7 +236,9 @@ const Step3Form: React.FC<Step3FormProps> = ({ onComplete, onBack, formData, isS
                 />
               )}
             </Field>
-            <ErrorMessage name="document" component="div" className="mt-1 text-sm text-red-600" />
+            <ErrorMessage name="document" component="div" className="mt-1 text-sm text-red-600">
+              {(msg) => <div>{t(msg)}</div>}
+            </ErrorMessage>
           </div>
 
           <div className="flex justify-between pt-4">

@@ -8,13 +8,11 @@ import CustomerSlice from "./CustomerSlice";
 import PaymentSlice from "./PaymentSlice";
 import ShippingSlice from "./ShippingSlice";
 export const CurrentStoreReducers = combineReducers({
-    products: ProductsSlice,
-    template: TemplateSlice,
-    category: CategorySlice,
-    orders: OrderSlice,
-    customers: CustomerSlice,
-    payments: PaymentSlice,
-    shipping: ShippingSlice
-})
-
-
+  products: ProductsSlice,
+  template: TemplateSlice,
+  category: CategorySlice,
+  orders: OrderSlice,
+  customers: CustomerSlice,
+  payments: PaymentSlice,
+  shipping: ShippingSlice,
+});

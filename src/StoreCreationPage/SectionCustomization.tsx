@@ -1,8 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { LayoutGrid, ArrowLeft, CheckCircle } from "lucide-react";
+import { Formik, Form } from 'formik';
+import * as Yup from 'yup';
 import PageTransition from "../components/FormsComponents/PageTransition";
 import ProgressBar from "../components/FormsComponents/ProgressBar";
 import Card from "../components/FormsComponents/Card";
@@ -11,12 +13,54 @@ import { RootState } from "../Store/Store";
 import {
   prevStep,
   createStoreSuccess,
-  StoreResponseData
+  StoreResponseData,
+  setStoreBasicInfo
 } from "../Store/StoreSlice/CreateStoreSlice";
 import { useTranslation } from "react-i18next";
 import { EndPoints } from "../Api/EndPoints";
 import { ApiClient } from "../Api/ApiClient";
 import { IResponseData } from "../interfaces/ResponseInterface";
+import { ICreateStore } from "../interfaces/CreateStoreInterface";
+
+const validationSchema = Yup.object().shape({
+  dominName: Yup.string()
+    .required("storeCreation.errors.domain_name_required")
+    .min(3, "storeCreation.errors.domain_name_min"),
+  phoneContact: Yup.string()
+    .required("storeCreation.errors.phone_required")
+    .matches(/^[0-9+\-\s()]+$/, "storeCreation.errors.phone_invalid"),
+  emailContact: Yup.string()
+    .required("storeCreation.errors.email_required")
+    .email("storeCreation.errors.email_invalid"),
+  businessType: Yup.number()
+    .required("storeCreation.errors.business_type_required"),
+  primaryColor: Yup.string()
+    .required("storeCreation.errors.primary_color_required")
+    .matches(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/, "storeCreation.errors.color_invalid"),
+  secondaryColor: Yup.string()
+    .required("storeCreation.errors.secondary_color_required")
+    .matches(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/, "storeCreation.errors.color_invalid"),
+  accentColor: Yup.string()
+    .required("storeCreation.errors.accent_color_required")
+    .matches(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/, "storeCreation.errors.color_invalid"),
+  font: Yup.string()
+    .required("storeCreation.errors.font_required"),
+  templateId: Yup.number()
+    .required("storeCreation.errors.template_required")
+    .min(1, "storeCreation.errors.template_required"),
+  logo: Yup.mixed()
+    .required("storeCreation.errors.logo_required"),
+  socialMediaLinks: Yup.array().of(
+    Yup.object().shape({
+      platform: Yup.string().required("storeCreation.errors.social_media_platform_required"),
+      url: Yup.string()
+        .required("storeCreation.errors.social_media_url_required")
+        .url("storeCreation.errors.social_media_url_invalid")
+    })
+  ).min(1, "storeCreation.errors.social_media_required"),
+  typeStore: Yup.number()
+    .required("storeCreation.errors.store_type_required")
+});
 
 const SectionCustomization = () => {
   const { t } = useTranslation();
@@ -25,159 +69,90 @@ const SectionCustomization = () => {
   const { storeData, currentStep, loading, success } = useSelector(
     (state: RootState) => state.createStore
   );
-  const ownerid = useSelector((state: RootState) => state.customer.customerData?.id);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const customerData = useSelector((state: RootState) => state.customer.customerData);
   const [error, setError] = useState<string | null>(null);
+
+  // Update ownerId in store when component mounts or customerData changes
+  useEffect(() => {
+    if (customerData?.id && (!storeData.ownerId || storeData.ownerId === 0)) {
+      console.log("Setting owner ID:", customerData.id);
+      dispatch(setStoreBasicInfo({ ownerId: customerData.id }));
+    }
+  }, [customerData?.id, storeData.ownerId, dispatch]);
 
   const handleBack = () => {
     dispatch(prevStep());
     navigate("/colors");
   };
 
-  const handleCreateStore = async () => {
-    setIsSubmitting(true);
+  const handleSubmit = async (values: ICreateStore, { setSubmitting }: any) => {
     setError(null);
-    console.log("Starting store creation with data:", storeData);
-    
-    // التحقق من وجود جميع البيانات المطلوبة
-    const validationErrors = [];
-    if (!storeData.dominName || storeData.dominName.trim() === "") {
-      validationErrors.push(t("storeCreation.errors.domain_name_required"));
-    }
-    
-    if (!storeData.phoneContact || storeData.phoneContact.trim() === "") {
-      validationErrors.push(t("storeCreation.errors.phone_required"));
-    }
-    
-    if (!storeData.emailContact || storeData.emailContact.trim() === "") {
-      validationErrors.push(t("storeCreation.errors.email_required"));
-    }
-    
-    if (!storeData.primaryColor || storeData.primaryColor.trim() === "") {
-      validationErrors.push(t("storeCreation.errors.primary_color_required"));
-    }
-    
-    if (!storeData.secondaryColor || storeData.secondaryColor.trim() === "") {
-      validationErrors.push(t("storeCreation.errors.secondary_color_required"));
-    }
-    
-    if (!storeData.accentColor || storeData.accentColor.trim() === "") {
-      validationErrors.push(t("storeCreation.errors.accent_color_required"));
-    }
-    
-    if (!storeData.font || storeData.font.trim() === "") {
-      validationErrors.push(t("storeCreation.errors.font_required"));
-    }
-    
-    if (!storeData.templateId) {
-      validationErrors.push(t("storeCreation.errors.template_required"));
-    }
-    
-    if (!storeData.logo) {
-      validationErrors.push(t("storeCreation.errors.logo_required"));
-    }
-    
-    if (storeData.socialMediaLinks.length === 0) {
-      validationErrors.push(t("storeCreation.errors.social_media_required"));
-    }
-    
-    if (!storeData.ownerId || storeData.ownerId === 0) {
-      if (!ownerid) {
-        validationErrors.push(t("storeCreation.errors.owner_id_required"));
-      }
-    }
-    
-    // إذا كان هناك أخطاء في التحقق، عرض رسالة خطأ وإيقاف عملية الإرسال
-    if (validationErrors.length > 0) {
-      setError(validationErrors.join(", "));
-      setIsSubmitting(false);
-      return;
-    }
+    console.log("Starting store creation with data:", values);
     
     const formData = new FormData();
 
-    formData.append("dominName", storeData.dominName);
-    formData.append("phoneContact", storeData.phoneContact);
-    formData.append("emailContact", storeData.emailContact);
-    formData.append("businessType", storeData.businessType?.toString() || "0");
-    formData.append("primaryColor", storeData.primaryColor);
-    formData.append("secondaryColor", storeData.secondaryColor);
-    formData.append("accentColor", storeData.accentColor);
-    formData.append("font", storeData.font);
-    formData.append("templateId", storeData.templateId?.toString() || "0");
-    formData.append("typeStore", storeData.typeStore?.toString() || "0");
-    
-    // Only append logo if it exists
-    if (storeData.logo) {
-      formData.append("logo", storeData.logo);
-    }
-    
-    // Use ownerid from customer state if available, otherwise use the one from storeData
-    const effectiveOwnerId = ownerid || storeData.ownerId;
-    formData.append("ownerId", effectiveOwnerId.toString());
-
-    // socialMediaLinks كمصفوفة
-    storeData.socialMediaLinks.forEach((link, idx) => {
-      formData.append(`socialMediaLinks[${idx}][platform]`, link.platform);
-      formData.append(`socialMediaLinks[${idx}][url]`, link.url);
+    // Append all form fields to FormData
+    Object.entries(values).forEach(([key, value]) => {
+      if (key === 'socialMediaLinks') {
+        value.forEach((link: any, idx: number) => {
+          formData.append(`socialMediaLinks[${idx}][platform]`, link.platform);
+          formData.append(`socialMediaLinks[${idx}][url]`, link.url);
+        });
+      } else if (key === 'logo') {
+        if (value instanceof File) {
+          formData.append('logo', value);
+        } else if (typeof value === 'string' && value.startsWith('data:')) {
+          // Convert base64 to blob
+          fetch(value)
+            .then(res => res.blob())
+            .then(blob => {
+              const file = new File([blob], 'logo.png', { type: blob.type });
+              formData.append('logo', file);
+            });
+        }
+      } else {
+        formData.append(key, value?.toString() || '');
+      }
     });
 
+    console.log("Form data entries:");
+    for (const [key, value] of formData.entries()) {
+      console.log(`${key}: ${value}`);
+    }
+    
     try {
       console.log("Sending API request to:", EndPoints.createStore);
-      console.log("Form data content:", {
-        dominName: storeData.dominName,
-        phoneContact: storeData.phoneContact,
-        emailContact: storeData.emailContact,
-        businessType: storeData.businessType?.toString() || "0",
-        primaryColor: storeData.primaryColor,
-        secondaryColor: storeData.secondaryColor,
-        accentColor: storeData.accentColor,
-        font: storeData.font,
-        templateId: storeData.templateId?.toString() || "0",
-        typeStore: storeData.typeStore?.toString() || "0",
-        effectiveOwnerId: ownerid || storeData.ownerId,
-        socialMediaLinks: storeData.socialMediaLinks
-      });
       
-      // When using FormData, the content type should be automatically set to multipart/form-data
-      // but we'll make an explicit API call to ensure proper headers
-      try {
-        const response = await ApiClient.post<IResponseData<StoreResponseData>>(
-          EndPoints.createStore,
-          formData,
-          {
-            headers: {
-              'Content-Type': 'multipart/form-data',
-            },
-          }
-        );
-        
-        console.log("Direct API response:", response);
-        
-        if (response.data && response.data.isSuccess) {
-          dispatch(createStoreSuccess(response.data.data as StoreResponseData));
-          console.log("Store created successfully!");
-          setTimeout(() => {
-            navigate("/stores");
-          }, 1500);
-        } else {
-          throw new Error(response.data?.message || "Failed to create store");
+      const response = await ApiClient.post<IResponseData<StoreResponseData>>(
+        EndPoints.createStore,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
         }
-      } catch (axiosError) {
-        console.error("Axios request failed:", axiosError);
-        throw axiosError;
+      );
+      
+      console.log("Direct API response:", response);
+      
+      if (response.data && response.data.isSuccess) {
+        dispatch(createStoreSuccess(response.data.data as StoreResponseData));
+        console.log("Store created successfully!");
+        setTimeout(() => {
+          navigate("/stores");
+        }, 1500);
+      } else {
+        throw new Error(response.data?.message || "Failed to create store");
       }
     } catch (err: unknown) {
       console.error("Store creation error:", err);
       if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError("حدث خطأ أثناء إنشاء المتجر");
+        setError(t("storeCreation.errors.generic_error"));
       }
-      
-      
     } finally {
-      setIsSubmitting(false);
+      setSubmitting(false);
     }
   };
 
@@ -209,158 +184,170 @@ const SectionCustomization = () => {
 
         <ProgressBar steps={steps} currentStep={currentStep} />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <Card title={t("storeCreation.store_details")}>
-            <div className="space-y-4">
-              <div>
-                <span className="text-sm text-neutral-500">
-                  {t("storeCreation.domain_name")}
-                </span>
-                <p className="font-medium">{storeData.dominName}</p>
+        <Formik
+          initialValues={storeData}
+          validationSchema={validationSchema}
+          onSubmit={handleSubmit}
+          enableReinitialize
+        >
+          {({ values, isSubmitting }) => (
+            <Form>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <Card title={t("storeCreation.store_details")}>
+                  <div className="space-y-4">
+                    <div>
+                      <span className="text-sm text-neutral-500">
+                        {t("storeCreation.domain_name")}
+                      </span>
+                      <p className="font-medium">{values.dominName}</p>
+                    </div>
+
+                    <div>
+                      <span className="text-sm text-neutral-500">
+                        {t("storeCreation.business_type")}
+                      </span>
+                      <p className="font-medium">{values.businessType}</p>
+                    </div>
+
+                    <div>
+                      <span className="text-sm text-neutral-500">
+                        {t("storeCreation.store_type")}
+                      </span>
+                      <p className="font-medium">
+                        {values.typeStore === 0 
+                          ? t("storeCreation.store_types.products") 
+                          : t("storeCreation.store_types.services")}
+                      </p>
+                    </div>
+
+                    <div>
+                      <span className="text-sm text-neutral-500">
+                        {t("storeCreation.contact_email")}
+                      </span>
+                      <p className="font-medium">{values.emailContact}</p>
+                    </div>
+
+                    <div>
+                      <span className="text-sm text-neutral-500">
+                        {t("storeCreation.contact_phone")}
+                      </span>
+                      <p className="font-medium">{values.phoneContact}</p>
+                    </div>
+                  </div>
+                </Card>
+
+                <Card title={t("storeCreation.theme_settings")}>
+                  <div className="space-y-4">
+                    <div>
+                      <span className="text-sm text-neutral-500">
+                        {t("storeCreation.selected_font")}
+                      </span>
+                      <p
+                        className="font-medium"
+                        style={{ fontFamily: values.font }}>
+                        {values.font}
+                      </p>
+                    </div>
+
+                    <div>
+                      <span className="text-sm text-neutral-500">
+                        {t("storeCreation.color_scheme")}
+                      </span>
+                      <div className="flex space-x-2 mt-1">
+                        <div
+                          className="w-8 h-8 rounded-full"
+                          style={{ backgroundColor: values.primaryColor }}
+                          title={t("storeCreation.primary_color")}
+                        />
+                        <div
+                          className="w-8 h-8 rounded-full"
+                          style={{ backgroundColor: values.secondaryColor }}
+                          title={t("storeCreation.secondary_color")}
+                        />
+                        <div
+                          className="w-8 h-8 rounded-full"
+                          style={{ backgroundColor: values.accentColor }}
+                          title={t("storeCreation.accent_color")}
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <span className="text-sm text-neutral-500">
+                        {t("storeCreation.template_id")}
+                      </span>
+                      <p className="font-medium">{values.templateId}</p>
+                    </div>
+                  </div>
+                </Card>
               </div>
 
-              <div>
-                <span className="text-sm text-neutral-500">
-                  {t("storeCreation.business_type")}
-                </span>
-                <p className="font-medium">{storeData.businessType}</p>
+              <Card title={t("storeCreation.social_media_links")} className="mt-8">
+                {values.socialMediaLinks.length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    {values.socialMediaLinks.map((link, index) => (
+                      <div key={index} className="flex items-center space-x-2">
+                        <span className="font-medium capitalize">
+                          {link.platform}:
+                        </span>
+                        <a
+                          href={link.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary-600 hover:underline truncate">
+                          {link.url}
+                        </a>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-neutral-500">
+                    {t("storeCreation.no_social_media_links")}
+                  </p>
+                )}
+              </Card>
+
+              <div className="mt-8 flex justify-between">
+                <button
+                  type="button"
+                  onClick={handleBack}
+                  className="btn btn-outline flex items-center"
+                  disabled={isSubmitting}>
+                  <ArrowLeft size={16} className="mr-2" />
+                  {t("storeCreation.back_to_colors")}
+                </button>
+
+                <button
+                  type="submit"
+                  disabled={isSubmitting || loading}
+                  className="btn btn-primary flex items-center">
+                  {isSubmitting || loading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
+                      {t("storeCreation.creating_store")}
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle size={16} className="mr-2" />
+                      {t("storeCreation.create_store")}
+                    </>
+                  )}
+                </button>
               </div>
 
-              <div>
-                <span className="text-sm text-neutral-500">
-                  {t("storeCreation.store_type")}
-                </span>
-                <p className="font-medium">
-                  {storeData.typeStore === 0 
-                    ? t("storeCreation.store_types.products") 
-                    : t("storeCreation.store_types.services")}
-                </p>
-              </div>
-
-              <div>
-                <span className="text-sm text-neutral-500">
-                  {t("storeCreation.contact_email")}
-                </span>
-                <p className="font-medium">{storeData.emailContact}</p>
-              </div>
-
-              <div>
-                <span className="text-sm text-neutral-500">
-                  {t("storeCreation.contact_phone")}
-                </span>
-                <p className="font-medium">{storeData.phoneContact}</p>
-              </div>
-            </div>
-          </Card>
-
-          <Card title={t("storeCreation.theme_settings")}>
-            <div className="space-y-4">
-              <div>
-                <span className="text-sm text-neutral-500">
-                  {t("storeCreation.selected_font")}
-                </span>
-                <p
-                  className="font-medium"
-                  style={{ fontFamily: storeData.font }}>
-                  {storeData.font}
-                </p>
-              </div>
-
-              <div>
-                <span className="text-sm text-neutral-500">
-                  {t("storeCreation.color_scheme")}
-                </span>
-                <div className="flex space-x-2 mt-1">
-                  <div
-                    className="w-8 h-8 rounded-full"
-                    style={{ backgroundColor: storeData.primaryColor }}
-                    title={t("storeCreation.primary_color")}
-                  />
-                  <div
-                    className="w-8 h-8 rounded-full"
-                    style={{ backgroundColor: storeData.secondaryColor }}
-                    title={t("storeCreation.secondary_color")}
-                  />
-                  <div
-                    className="w-8 h-8 rounded-full"
-                    style={{ backgroundColor: storeData.accentColor }}
-                    title={t("storeCreation.accent_color")}
-                  />
+              {error && (
+                <div className="mt-4 p-4 bg-red-50 text-red-700 rounded-md">
+                  {error}
                 </div>
-              </div>
-
-              <div>
-                <span className="text-sm text-neutral-500">
-                  {t("storeCreation.template_id")}
-                </span>
-                <p className="font-medium">{storeData.templateId}</p>
-              </div>
-            </div>
-          </Card>
-        </div>
-
-        <Card title={t("storeCreation.social_media_links")} className="mt-8">
-          {storeData.socialMediaLinks.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-              {storeData.socialMediaLinks.map((link, index) => (
-                <div key={index} className="flex items-center space-x-2">
-                  <span className="font-medium capitalize">
-                    {link.platform}:
-                  </span>
-                  <a
-                    href={link.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-primary-600 hover:underline truncate">
-                    {link.url}
-                  </a>
+              )}
+              {success && (
+                <div className="mt-4 p-4 bg-green-50 text-green-700 rounded-md">
+                  {t("storeCreation.store_created_success")}
                 </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-neutral-500">
-              {t("storeCreation.no_social_media_links")}
-            </p>
+              )}
+            </Form>
           )}
-        </Card>
-
-        <div className="mt-8 flex justify-between">
-          <button
-            onClick={handleBack}
-            className="btn btn-outline flex items-center"
-            disabled={isSubmitting}>
-            <ArrowLeft size={16} className="mr-2" />
-            {t("storeCreation.back_to_colors")}
-          </button>
-
-          <button
-            onClick={handleCreateStore}
-            disabled={isSubmitting || loading}
-            className="btn btn-primary flex items-center">
-            {isSubmitting || loading ? (
-              <>
-                <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
-                {t("storeCreation.creating_store")}
-              </>
-            ) : (
-              <>
-                <CheckCircle size={16} className="mr-2" />
-                {t("storeCreation.create_store")}
-              </>
-            )}
-          </button>
-        </div>
-
-        {error && (
-          <div className="mt-4 p-4 bg-red-50 text-red-700 rounded-md">
-            {error}
-          </div>
-        )}
-        {success && (
-          <div className="mt-4 p-4 bg-green-50 text-green-700 rounded-md">
-            {t("storeCreation.store_created_success")}
-          </div>
-        )}
+        </Formik>
       </div>
     </PageTransition>
   );

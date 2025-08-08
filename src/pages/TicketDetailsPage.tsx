@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ticketsApi } from '../Api/tickets';
-import { Ticket, TicketMessage } from '../interfaces/ticket';
+import { Ticket, TicketMessage } from '../interfaces/ticketInterface';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 

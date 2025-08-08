@@ -34,27 +34,30 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         )}
         <div className="relative">
           {leftIcon && (
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
               {leftIcon}
             </div>
           )}
           <input
             type={type}
             className={cn(
-              "block w-full rounded-md shadow-sm sm:text-sm",
-              "border border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-500",
-              "focus:ring-1 focus:ring-primary-500 dark:focus:ring-primary-500",
+              "block w-full px-4 py-3 rounded-xl shadow-sm text-sm transition-all duration-200",
+              "border border-gray-300 dark:border-gray-600",
+              "focus:border-primary-500 dark:focus:border-primary-500",
+              "focus:ring-2 focus:ring-primary-500/20 dark:focus:ring-primary-500/20",
               "dark:bg-gray-800 dark:text-white",
-              leftIcon && "pl-10",
-              rightIcon && "pr-10",
-              error && "border-error-500 focus:border-error-500 focus:ring-error-500",
+              "hover:border-primary-400 dark:hover:border-primary-400",
+              "placeholder:text-gray-400 dark:placeholder:text-gray-500",
+              leftIcon && "pl-12",
+              rightIcon && "pr-12",
+              error && "border-red-500 focus:border-red-500 focus:ring-red-500/20",
               className
             )}
             ref={ref}
             {...props}
           />
           {rightIcon && (
-            <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+            <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-gray-400">
               {rightIcon}
             </div>
           )}
@@ -63,7 +66,10 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           <p className="text-sm text-gray-500 dark:text-gray-400">{helper}</p>
         )}
         {error && (
-          <p className="text-sm text-error-600">{error}</p>
+          <p className="text-sm text-red-600 dark:text-red-400 flex items-center">
+            <span className="mr-1">⚠</span>
+            {error}
+          </p>
         )}
       </div>
     );

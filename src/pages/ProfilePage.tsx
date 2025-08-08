@@ -19,6 +19,7 @@ const ProfilePage = () => {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('personal');
   const customerData = useSelector((state: RootState) => state.customer.customerData);
+  console.log(customerData);
 
   // Helper function to format dates
   const formatDate = (dateString: string | Date) => {
@@ -58,8 +59,9 @@ const ProfilePage = () => {
   };
 
   const getPersonalFields = () => {
-    if (!customerData || !customerData.user) return [];
-    
+
+    if (!customerData || !customerData.user) return [];  
+   
     return [
       { label: t('profile.full_name'), value: customerData.user.fullName, fieldKey: 'user.fullName' },
       { label: t('profile.email'), value: customerData.user.email, fieldKey: 'user.email' },
@@ -76,6 +78,7 @@ const ProfilePage = () => {
         ? [{ label: t('profile.id_image'), value: '', isImage: true, imageUrl: customerData.imageIdentity.url }]
         : [])
     ];
+    
   };
 
   const getNationalAddressFields = () => {

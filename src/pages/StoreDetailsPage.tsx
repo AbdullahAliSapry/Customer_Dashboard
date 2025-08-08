@@ -85,7 +85,20 @@ const StoreDetailsPage: React.FC = () => {
     };
     
     fetchStoreData();
-  }, [storeId, t]); // Added t to dependencies to handle language changes
+  }, [storeId, t]);
+
+  // Check if store is active and redirect if not
+  useEffect(() => {
+    if (storeData && !storeData.storeIsActive) {
+      navigate('/stores', { 
+        replace: true,
+        state: { 
+          message: t('stores.store_inactive_message'),
+          type: 'error'
+        }
+      });
+    }
+  }, [storeData, navigate, t]);
 
   if (loading) {
     return (
@@ -116,10 +129,21 @@ const StoreDetailsPage: React.FC = () => {
   const renderStoreContent = () => {
     if (!storeData) return null;
     if (storeData.typeStore === BusinessTypeMarchent.services) {
-      // عرض الخدمات (placeholder مؤقت)
+      // عرض الخدمات
       return (
-        <div className="mt-4 p-4 bg-blue-50 rounded-md text-blue-700">
-          {t('storeDetails.services_placeholder', 'هنا سيتم عرض صفحة الخدمات قريبًا')}
+        <div className="px-6 py-4 border-b">
+          <h2 className="text-lg font-semibold mb-4">{t('storeDetails.services_section', 'الخدمات')}</h2>
+          <div className="text-center py-8">
+            <div className="text-gray-500 mb-4">
+              {t('storeDetails.services_placeholder', 'هنا سيتم عرض خدمات المتجر')}
+            </div>
+            <button
+              onClick={() => navigate(`/store/${storeData.id}/services`)}
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            >
+              {t('storeDetails.manage_services')}
+            </button>
+          </div>
         </div>
       );
     }
@@ -349,13 +373,21 @@ const StoreDetailsPage: React.FC = () => {
               <span>{t('storeDetails.visit_store')}</span>
               <ExternalLink size={14} />
             </button>
-            {/* عرض زر إدارة المنتجات فقط إذا كان المتجر من نوع products */}
+            {/* عرض زر إدارة المنتجات أو الخدمات حسب نوع المتجر */}
             {storeData.typeStore === BusinessTypeMarchent.products && (
               <button
                 onClick={() => navigate(`/store/${storeData.id}/products`)}
                 className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
               >
                 {t('storeDetails.manage_products')}
+              </button>
+            )}
+            {storeData.typeStore === BusinessTypeMarchent.services && (
+              <button
+                onClick={() => navigate(`/store/${storeData.id}/services`)}
+                className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+              >
+                {t('storeDetails.manage_services')}
               </button>
             )}
             <button
@@ -365,8 +397,6 @@ const StoreDetailsPage: React.FC = () => {
               {t('storeDetails.store_dashboard')}
             </button>
           </div>
-          {/* عرض الخدمات فقط إذا كان المتجر من نوع services */}
-          {renderStoreContent()}
         </div>
       </div>
       

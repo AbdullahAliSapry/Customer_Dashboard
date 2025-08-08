@@ -1,4 +1,4 @@
-import { Ticket } from '../interfaces/ticket';
+import { Ticket } from '../interfaces/ticketInterface';
 
 export const mockTickets: Ticket[] = [
   {

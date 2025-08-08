@@ -4,6 +4,13 @@ export default {
   darkMode: "class",
   theme: {
     extend: {
+      transitionDelay: {
+        '100': '100ms',
+        '200': '200ms',
+        '300': '300ms',
+        '400': '400ms',
+        '500': '500ms',
+      },
       colors: {
         primary: {
           50: "#ecfdf5",
@@ -53,11 +60,19 @@ export default {
         "slide-up": "slideUp 0.5s ease-out",
         "slide-down": "slideDown 0.5s ease-out",
         "bounce-slow": "bounce 3s infinite",
+        "fade-in-scale": "fadeInScale 0.6s ease-out",
+        "slide-in-left": "slideInLeft 0.5s ease-out forwards",
+        "slide-up-fade": "slideUpFade 0.5s ease-out",
+        "pulse-width": "pulseWidth 2s ease-in-out infinite",
       },
       keyframes: {
         fadeIn: {
           "0%": { opacity: "0" },
           "100%": { opacity: "1" },
+        },
+        fadeInScale: {
+          "0%": { opacity: "0", transform: "scale(0.9)" },
+          "100%": { opacity: "1", transform: "scale(1)" },
         },
         slideUp: {
           "0%": { transform: "translateY(20px)", opacity: "0" },
@@ -66,6 +81,19 @@ export default {
         slideDown: {
           "0%": { transform: "translateY(-20px)", opacity: "0" },
           "100%": { transform: "translateY(0)", opacity: "1" },
+        },
+        slideInLeft: {
+          "0%": { transform: "translateX(-20px)", opacity: "0" },
+          "100%": { transform: "translateX(0)", opacity: "1" },
+        },
+        slideUpFade: {
+          "0%": { transform: "translateY(30px)", opacity: "0" },
+          "100%": { transform: "translateY(0)", opacity: "1" },
+        },
+        pulseWidth: {
+          "0%": { width: "0%" },
+          "50%": { width: "100%" },
+          "100%": { width: "0%" },
         },
       },
     },

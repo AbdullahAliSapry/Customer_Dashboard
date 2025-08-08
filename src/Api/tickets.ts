@@ -1,8 +1,8 @@
 import axios from 'axios';
-import { Ticket, TicketMessage, CreateTicketInput, SendMessageInput } from '../interfaces/ticket';
+import { Ticket, TicketMessage, CreateTicketInput, SendMessageInput } from '../interfaces/ticketInterface';
 import { mockTickets } from '../mock/tickets';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+
 
 export const ticketsApi = {
   // Get all tickets for the current user

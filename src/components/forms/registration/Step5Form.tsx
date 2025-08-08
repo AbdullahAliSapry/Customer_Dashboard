@@ -437,7 +437,9 @@ const Step5Form: React.FC<Step5FormProps> = ({ onComplete, onBack, formData, isS
                   />
                 )}
               </Field>
-              <ErrorMessage name="hasTaxDeclaration" component="div" className="mt-1 text-sm text-red-600" />
+              <ErrorMessage name="hasTaxDeclaration" component="div" className="mt-1 text-sm text-red-600">
+                {(msg) => <div>{t(msg)}</div>}
+              </ErrorMessage>
             </div>
 
             {values.hasTaxDeclaration ? (
@@ -453,7 +455,9 @@ const Step5Form: React.FC<Step5FormProps> = ({ onComplete, onBack, formData, isS
                     className="p-2 outline-none"
                     error={touched.taxNumber && errors.taxNumber ? t(errors.taxNumber) : undefined}
                   />
-                  <ErrorMessage name="taxNumber" component="div" className="mt-1 text-sm text-red-600" />
+                  <ErrorMessage name="taxNumber" component="div" className="mt-1 text-sm text-red-600">
+                    {(msg) => <div>{t(msg)}</div>}
+                  </ErrorMessage>
                 </div>
 
                 <div>
@@ -470,7 +474,9 @@ const Step5Form: React.FC<Step5FormProps> = ({ onComplete, onBack, formData, isS
                       />
                     )}
                   </Field>
-                  <ErrorMessage name="imageTax" component="div" className="mt-1 text-sm text-red-600" />
+                  <ErrorMessage name="imageTax" component="div" className="mt-1 text-sm text-red-600">
+                    {(msg) => <div>{t(msg)}</div>}
+                  </ErrorMessage>
                 </div>
               </>
             ) : (
@@ -488,7 +494,9 @@ const Step5Form: React.FC<Step5FormProps> = ({ onComplete, onBack, formData, isS
                     />
                   )}
                 </Field>
-                <ErrorMessage name="exemptionReasonDocument" component="div" className="mt-1 text-sm text-red-600" />
+                <ErrorMessage name="exemptionReasonDocument" component="div" className="mt-1 text-sm text-red-600">
+                  {(msg) => <div>{t(msg)}</div>}
+                </ErrorMessage>
               </div>
             )}
           </div>

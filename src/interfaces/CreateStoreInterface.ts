@@ -14,7 +14,7 @@ export interface ICreateStore {
   font: string;
   templateId: number;
   ownerId: number;
-  logo: File | null;
+  logo: File | string | null;
   socialMediaLinks: ICreateSocialMediaLink[];
   typeStore: BusinessTypeMarchent;
 }
@@ -25,7 +25,6 @@ export interface ICreateSocialMediaLink {
   url: string;
   storeId?: number;
 }
-
 
 export interface ICreateTemplateData {
   id?: number;

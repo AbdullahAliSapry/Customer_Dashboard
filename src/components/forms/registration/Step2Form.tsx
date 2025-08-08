@@ -359,7 +359,9 @@ const Step2Form: React.FC<Step2FormProps> = ({ onComplete, onBack, formData, isS
                 className="p-2 outline-none"
                 error={touched.registrationNumber && errors.registrationNumber ? t(errors.registrationNumber) : undefined}
               />
-              <ErrorMessage name="registrationNumber" component="div" className="mt-1 text-sm text-red-600" />
+              <ErrorMessage name="registrationNumber" component="div" className="mt-1 text-sm text-red-600">
+                {(msg) => <div>{t(msg)}</div>}
+              </ErrorMessage>
             </div>
 
             <div>
@@ -377,7 +379,9 @@ const Step2Form: React.FC<Step2FormProps> = ({ onComplete, onBack, formData, isS
                   />
                 )}
               </Field>
-              <ErrorMessage name="issueDate" component="div" className="mt-1 text-sm text-red-600" />
+              <ErrorMessage name="issueDate" component="div" className="mt-1 text-sm text-red-600">
+                {(msg) => <div>{t(msg)}</div>}
+              </ErrorMessage>
             </div>
 
             <div>
@@ -395,7 +399,9 @@ const Step2Form: React.FC<Step2FormProps> = ({ onComplete, onBack, formData, isS
                   />
                 )}
               </Field>
-              <ErrorMessage name="expiryDate" component="div" className="mt-1 text-sm text-red-600" />
+              <ErrorMessage name="expiryDate" component="div" className="mt-1 text-sm text-red-600">
+                {(msg) => <div>{t(msg)}</div>}
+              </ErrorMessage>
             </div>
           </div>
 
@@ -413,7 +419,9 @@ const Step2Form: React.FC<Step2FormProps> = ({ onComplete, onBack, formData, isS
                 />
               )}
             </Field>
-            <ErrorMessage name="document" component="div" className="mt-1 text-sm text-red-600" />
+            <ErrorMessage name="document" component="div" className="mt-1 text-sm text-red-600">
+              {(msg) => <div>{t(msg)}</div>}
+            </ErrorMessage>
           </div>
 
           <div className="flex justify-between pt-4">
